@@ -1,18 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 ## Setup options & libraries (always echo)
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
-library(ggplot2)
-```
 
 ## Save data to hard drive
-```{r savedata}
+
+```r
 rm(list = ls())
 
 parent_folder = "/Users/minna/Documents/datasciencecoursera/reproducibleresearch_week2"
@@ -32,7 +24,8 @@ if(!file.exists(dest_filename)){
 }
 ```
 ## Load and preprocess data
-```{r processdata}
+
+```r
 activity_data <- read.csv(gsub("zip", "csv", dest_filename))
 
 # str(activity_data)
@@ -43,35 +36,48 @@ activity_data$date <- as.Date(activity_data$date , "%Y-%m-%d")
 
 
 ## What is mean total number of steps taken per day?
-```{r meanstepsperday}
+
+```r
 # Total steps/day excluding NAs
 daily_steps <- with(activity_data, tapply(steps, list(date), sum, na.rm = TRUE))
 # daily_steps <- with(activity_data, aggregate(steps, list(date), sum, na.rm = TRUE))
 
 qplot(daily_steps, main = "Histogram of daily steps", xlab = "Steps daily")
-
-avg_steps <- mean(daily_steps)
-median_steps <- median(daily_steps)
+```
 
 ```
-The mean total number of steps per day is `r avg_steps` and the median is `r median_steps`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![](PA1_template_files/figure-html/meanstepsperday-1.png)<!-- -->
+
+```r
+avg_steps <- mean(daily_steps)
+median_steps <- median(daily_steps)
+```
+The mean total number of steps per day is 9354.2295082 and the median is 10395.
 
 ## What is the average daily activity pattern?
-```{r averagedailyactivity}
+
+```r
 steps_across_days <- with(activity_data, aggregate(steps, list(interval), mean, na.rm = TRUE))
 
 # Plot the activity
 ggplot(steps_across_days, aes(x = Group.1, y = x)) + geom_line() + labs(title = "Average Daily Activity Pattern", x = "Minute of the Day", y = "Number of Steps")
-
-# Find five minute segment with max steps
-max_segment <- steps_across_days$Group.1[match(max(steps_across_days$x),steps_across_days$x)]
-
 ```
 
-The five minute segment with the maximum average number of steps across all days is between `r max_segment` and `r max_segment + 5`
+![](PA1_template_files/figure-html/averagedailyactivity-1.png)<!-- -->
+
+```r
+# Find five minute segment with max steps
+max_segment <- steps_across_days$Group.1[match(max(steps_across_days$x),steps_across_days$x)]
+```
+
+The five minute segment with the maximum average number of steps across all days is between 835 and 840
 
 ## Imputing missing values
-```{r impute}
+
+```r
 num_missing <- sum(is.na(activity_data$steps))
 
 # Impute missing values with the average for the five minute interval across all days
@@ -86,20 +92,28 @@ for (i in 1:nrow(activity_data_imputed)){
 daily_steps_imputed <- with(activity_data_imputed, tapply(steps, list(date), sum, na.rm = TRUE))
 
 qplot(daily_steps_imputed, main = "Histogram of daily steps with imputed data)", xlab = "Steps daily")
+```
 
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![](PA1_template_files/figure-html/impute-1.png)<!-- -->
+
+```r
 avg_steps_imputed <- mean(daily_steps_imputed)
 median_steps_imputed <- median(daily_steps_imputed)
 ```
 
-There are `r num_missing` missing values in the dataset. Those were replaced by the mean for that five minute interval over all days.
+There are 2304 missing values in the dataset. Those were replaced by the mean for that five minute interval over all days.
 
-The mean total number of steps per day (including imputed data) is `r avg_steps_imputed` and the median is `r median_steps_imputed`.
+The mean total number of steps per day (including imputed data) is 1.0766189\times 10^{4} and the median is 1.0766189\times 10^{4}.
 
-Imputing NA values by replacing them with the interval average across all the days resulted in a significantly higher mean (difference of `r avg_steps_imputed - avg_steps`) and a higher median (difference of `r median_steps_imputed - median_steps`).
+Imputing NA values by replacing them with the interval average across all the days resulted in a significantly higher mean (difference of 1411.959171) and a higher median (difference of 371.1886792).
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r weekdayvweekend}
 
+```r
 # Create a vector of weekdays
 weekdays_vec <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
 
@@ -114,8 +128,9 @@ ggplot(avg_steps2, aes(x = Group.1, y = x)) +
   geom_line() + 
   labs(title = "Average Activity Pattern", x = "Minute of the Day", y = "Number of Steps") +
   facet_grid(. ~ Group.2)
-
 ```
+
+![](PA1_template_files/figure-html/weekdayvweekend-1.png)<!-- -->
 
 
 
